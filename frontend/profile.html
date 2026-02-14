@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Clothy</title>
+  <link rel="stylesheet" href="style.css">
+
+
+
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <h2>Clothy</h2>
+
+    <!-- Search Bar -->
+    <div class="nav-search-container">
+      <input type="text" id="nav-search-input" placeholder="Search products..." class="nav-search-input">
+      <button class="nav-search-btn" onclick="performNavSearch()">🔍</button>
+      <div id="nav-search-results" class="nav-search-results"></div>
+    </div>
+
+    <div>
+      <a href="index.html">Home</a>
+      <a href="collection.html">Collection</a>
+      <a href="cart.html" class="cart-link">
+        Cart
+        <span id="cart-count" class="cart-count">0</span>
+      </a>
+
+      <a href="admin-login.html" class="admin-btn" style="display: none;">Admin</a>
+
+      <!-- User Profile Dropdown (shown when logged in) -->
+      <div class="profile-dropdown" id="user-profile-dropdown" style="display: none;">
+        <button class="profile-btn" onclick="toggleUserProfileDropdown()">
+          <span class="profile-avatar">👤</span>
+          <span id="user-profile-username">User</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div id="user-profile-menu" class="profile-menu">
+          <div class="profile-header">
+            <div class="profile-info">
+              <h4 id="user-profile-name">User Name</h4>
+              <p id="user-profile-email">user@example.com</p>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <a href="profile.html" class="profile-link view-profile">📋 View Profile</a>
+            <a href="#" onclick="userLogout()" class="profile-link logout">🚪 Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Button (shown when not logged in) -->
+      <a href="login.html" id="login-link" class="login-btn-special">Login</a>
+    </div>
+  </nav>
+
+  <div class="profile-page">
+    <div class="profile-page-header">
+      <div class="profile-avatar-large">👤</div>
+      <h1 id="profile-name">Welcome Back!</h1>
+      <p id="profile-email">user@example.com</p>
+    </div>
+
+    <div class="profile-content">
+      <div class="profile-sidebar">
+        <div class="profile-section">
+          <h3>Account Menu</h3>
+          <ul class="nav-menu">
+            <li><a href="#personal-info" class="active">Personal Information</a></li>
+            <li><a href="#order-history">Order History</a></li>
+            <li><a href="#addresses">Shipping Addresses</a></li>
+            <li><a href="#payment">Payment Methods</a></li>
+            <li><a href="#settings">Account Settings</a></li>
+          </ul>
+        </div>
+
+        <div class="profile-section">
+          <h3>Quick Actions</h3>
+          <button class="edit-profile-btn" onclick="editProfile()">Edit Profile</button>
+          <button class="edit-profile-btn" onclick="changePassword()"
+            style="background: #28a745; margin-top: 10px;">Change Password</button>
+        </div>
+      </div>
+
+      <div class="profile-main">
+        <div class="profile-section" id="personal-info">
+          <h3>Personal Information</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Full Name</div>
+              <div class="info-value" id="info-name">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Email Address</div>
+              <div class="info-value" id="info-email">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Phone Number</div>
+              <div class="info-value" id="info-phone">Not provided</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Member Since</div>
+              <div class="info-value" id="info-joined">Loading...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-section" id="order-history">
+          <h3>Order History</h3>
+          <div id="orders-container">
+            <div class="empty-state">
+              <div class="empty-state-icon">📦</div>
+              <p>No orders yet</p>
+              <p><a href="collection.html" class="btn">Start Shopping</a></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-section" id="addresses">
+          <h3>Shipping Addresses</h3>
+          <div id="addresses-container">
+            <div class="empty-state">
+              <div class="empty-state-icon">🏠</div>
+              <p>No saved addresses</p>
+              <button class="edit-profile-btn" onclick="addAddress()">Add Address</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-section" id="payment">
+          <h3>Payment Methods</h3>
+          <div id="payment-container">
+            <div class="empty-state">
+              <div class="empty-state-icon">💳</div>
+              <p>No saved payment methods</p>
+              <button class="edit-profile-btn" onclick="addPaymentMethod()">Add Payment Method</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-section" id="settings">
+          <h3>Account Settings</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Email Notifications</div>
+              <div class="info-value">
+                <label class="switch">
+                  <input type="checkbox" id="email-notifications" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">SMS Notifications</div>
+              <div class="info-value">
+                <label class="switch">
+                  <input type="checkbox" id="sms-notifications">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Two-Factor Authentication</div>
+              <div class="info-value">
+                <label class="switch">
+                  <input type="checkbox" id="2fa">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Account Privacy</div>
+              <div class="info-value">
+                <select id="privacy-settings" style="padding: 5px; border-radius: 4px; border: 1px solid #ddd;">
+                  <option value="public">Public</option>
+                  <option value="friends">Friends Only</option>
+                  <option value="private">Private</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Address Modal -->
+  <div class="modal" id="add-address-modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>Add Shipping Address</h3>
+        <button class="close-btn" onclick="closeAddressModal()">&times;</button>
+      </div>
+      <form class="modal-form" onsubmit="saveAddress(event)">
+        <div class="form-group">
+          <label for="address-type">Address Type</label>
+          <select id="address-type" required onchange="updateAddressName()">
+            <option value="home">🏠 Home</option>
+            <option value="work">🏢 Work</option>
+            <option value="other">📍 Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="address-name">Full Name *</label>
+          <input type="text" id="address-name" placeholder="John Doe" required>
+        </div>
+
+        <div class="form-group">
+          <label for="address-email">Email Address *</label>
+          <input type="email" id="address-email" placeholder="john.doe@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="address-house">House Name/Number</label>
+          <input type="text" id="address-house" placeholder="A-101, Building Name, Flat No.">
+        </div>
+
+        <div class="form-group">
+          <label for="address-street">Street Address</label>
+          <input type="text" id="address-street" placeholder="123 Main Street" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="address-city">City</label>
+            <input type="text" id="address-city" placeholder="Mumbai" required>
+          </div>
+          <div class="form-group">
+            <label for="address-state">State</label>
+            <input type="text" id="address-state" placeholder="Maharashtra" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="address-zip">ZIP Code</label>
+            <input type="text" id="address-zip" placeholder="400001" required>
+          </div>
+          <div class="form-group">
+            <label for="address-country">Country</label>
+            <select id="address-country" required>
+              <option value="IN" selected>India</option>
+              <option value="US">United States</option>
+              <option value="UK">United Kingdom</option>
+              <option value="CA">Canada</option>
+              <option value="AU">Australia</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address-phone">Phone Number (Optional)</label>
+          <input type="tel" id="address-phone" placeholder="+91 98765 43210">
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="address-default" name="default-address">
+            Set as default address
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeAddressModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Save Address</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h2>Clothy</h2>
+        <p>Elevating your everyday style with premium quality and modern aesthetics. Designed for the bold, crafted for
+          comfort.</p>
+        <div class="social-links">
+          <a href="#" class="social-link" title="Instagram">📷</a>
+          <a href="#" class="social-link" title="Twitter">🐦</a>
+          <a href="#" class="social-link" title="Facebook">📘</a>
+        </div>
+      </div>
+
+      <div class="footer-column">
+        <h3>Shop</h3>
+        <ul>
+          <li><a href="collection.html">All Products</a></li>
+          <li><a href="collection.html?category=Men">Men</a></li>
+          <li><a href="collection.html?category=Women">Women</a></li>
+          <li><a href="collection.html?category=Accessories">Accessories</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3>Company</h3>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Sustainability</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3>Support</h3>
+        <ul>
+          <li><a href="#">Help Center</a></li>
+          <li><a href="#">Shipping & Returns</a></li>
+          <li><a href="#">Size Guide</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 Clothy | Fashion Redefined</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    // Profile page specific functions
+    document.addEventListener('DOMContentLoaded', function () {
+      updateCartCount();
+      updateProfileUI();
+      loadProfileData();
+      loadOrderHistory();
+      loadAddresses();
+      setupNavigation();
+
+      // Check if user is logged in
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        showNotification('Please login to view your profile');
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+      }
+    });
+
+    function loadProfileData() {
+      const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+      const user = userData ? JSON.parse(userData) : {};
+
+      if (user.firstName || user.lastName || user.email) {
+        // Create full name from first name and last name
+        const firstName = user.firstName || '';
+        const lastName = user.lastName || '';
+        const fullName = (firstName + ' ' + lastName).trim() || user.name || 'User';
+
+        // Update profile header
+        document.getElementById('profile-name').textContent = fullName;
+        document.getElementById('profile-email').textContent = user.email || 'user@example.com';
+
+        // Update profile image if available
+        const profileAvatarLarge = document.querySelector('.profile-avatar-large');
+        if (user.profileImage && profileAvatarLarge) {
+          if (user.profileImage.startsWith('http')) {
+            profileAvatarLarge.innerHTML = `<img src="${user.profileImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+            profileAvatarLarge.style.border = '4px solid #fff'; // Clean border for image
+            profileAvatarLarge.style.padding = '0'; // Remove padding for image
+            profileAvatarLarge.style.overflow = 'hidden'; // Ensure image stays in circle
+          } else {
+            profileAvatarLarge.textContent = '👤';
+          }
+        }
+
+        // Update personal information
+        document.getElementById('info-name').textContent = fullName;
+        document.getElementById('info-email').textContent = user.email || 'Not provided';
+        document.getElementById('info-phone').textContent = user.phone || 'Not provided';
+        document.getElementById('info-joined').textContent = user.joinedDate || new Date().toLocaleDateString();
+      }
+    }
+
+    async function loadOrderHistory() {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const response = await fetch('/api/orders', {
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        if (response.ok) {
+          const orders = await response.json();
+          console.log('Loaded orders:', orders); // Debug log
+          displayOrderHistory(orders);
+        } else {
+          const error = await response.json();
+          console.error('Failed to load orders:', error);
+        }
+      } catch (error) {
+        console.error('Error loading order history:', error);
+        showNotification('Failed to load order history');
+      }
+    }
+
+    function displayOrderHistory(orders) {
+      const container = document.getElementById('orders-container');
+
+      if (orders.length === 0) {
+        container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📦</div>
+          <p>No orders yet</p>
+          <p><a href="collection.html" class="btn">Start Shopping</a></p>
+        </div>
+      `;
+        return;
+      }
+
+      let ordersHTML = '';
+      orders.forEach(order => {
+        const statusClass = `status-${order.status || 'pending'}`;
+        const statusText = (order.status || 'pending').charAt(0).toUpperCase() + (order.status || 'pending').slice(1);
+        const orderItems = order.items || [];
+
+        // Calculate order total
+        let calculatedTotal = orderItems.length > 0 ?
+          orderItems.reduce((sum, item) => sum + (item.total || (item.price * item.quantity)), 0) :
+          order.totalAmount || 0;
+
+        // Handle COD Logic
+        let itemsForDisplay = [...orderItems];
+        const isCODOrder = order.paymentMethod === 'cod';
+        const hasCODChargeItem = orderItems.some(item => item.productName === 'Cash on Delivery Charge');
+
+        if (isCODOrder && !hasCODChargeItem) {
+          itemsForDisplay.push({
+            productName: 'Cash on Delivery Charge',
+            price: 10,
+            quantity: 1,
+            total: 10,
+            isVirtualCODCharge: true
+          });
+          calculatedTotal += 10;
+        }
+
+        // Generate Items HTML
+        const itemsHTML = itemsForDisplay.length > 0 ? itemsForDisplay.map(item => {
+          const isCODCharge = item.productName === 'Cash on Delivery Charge';
+          const itemClass = isCODCharge ? 'order-product-item cod-charge' : 'order-product-item';
+
+          return `
+            <div class="${itemClass}">
+              <div class="prod-details">
+                <div class="prod-name">${isCODCharge ? '💵 ' + item.productName : (item.productName || 'Unknown Product')}</div>
+                ${!isCODCharge ? `
+                  <div class="prod-meta">
+                    <span>Qty: ${item.quantity || 0}</span>
+                    ${item.size ? `<span class="prod-size">Size: ${item.size}</span>` : ''}
+                  </div>
+                ` : ''}
+              </div>
+              <div class="prod-pricing">
+                ${!isCODCharge ? `<div class="prod-unit-price">₹${item.price || 0}</div>` : ''}
+                <div class="prod-total-price">₹${item.total || (item.price * item.quantity) || 0}</div>
+              </div>
+            </div>
+          `;
+        }).join('') : '<div class="no-items-msg">No items found</div>';
+
+        // Generate Shipping HTML
+        const shippingHTML = order.shippingAddress ? `
+          <div class="order-shipping-card">
+            <h4>🏠 Shipping Address</h4>
+            <div class="shipping-grid">
+              <div class="shipping-row"><span class="label">Name:</span> <span class="value">${order.shippingAddress.name || 'N/A'}</span></div>
+              ${order.shippingAddress.phone ? `<div class="shipping-row"><span class="label">Phone:</span> <span class="value">${order.shippingAddress.phone}</span></div>` : ''}
+              <div class="shipping-row wide">
+                <span class="label">Address:</span> 
+                <span class="value">
+                  ${order.shippingAddress.house ? order.shippingAddress.house + ', ' : ''}
+                  ${order.shippingAddress.street || order.shippingAddress.address || ''},
+                  ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.zipCode}
+                </span>
+              </div>
+            </div>
+          </div>
+        ` : '';
+
+        // Generate UPI HTML
+        const upiHTML = (order.paymentMethod === 'upi' && order.utrNumber) ? `
+          <div class="upi-ref-card">
+            <div class="upi-label">UPI Transaction Reference</div>
+            <div class="upi-value">UTR: ${order.utrNumber}</div>
+          </div>
+        ` : '';
+
+        ordersHTML += `
+          <div class="order-card">
+            <div class="order-card-header">
+              <div class="order-info-group">
+                <div class="order-id">#${order._id || order.orderId || 'Unknown'}</div>
+                <div class="order-date">${order.createdAt ? new Date(order.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+              </div>
+              <div class="order-status-badge ${statusClass}">${statusText}</div>
+            </div>
+            
+            <div class="order-card-body">
+              ${shippingHTML}
+              <div class="order-products-list">
+                ${itemsHTML}
+              </div>
+            </div>
+
+            <div class="order-card-footer">
+              <div class="order-total-row">
+                <span>Order Total</span>
+                <span class="total-amount">₹${calculatedTotal}</span>
+              </div>
+              ${upiHTML}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = ordersHTML;
+    }
+
+    function setupNavigation() {
+      const navLinks = document.querySelectorAll('.nav-menu a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+
+          // Remove active class from all links
+          navLinks.forEach(l => l.classList.remove('active'));
+          // Add active class to clicked link
+          this.classList.add('active');
+
+          // Scroll to the corresponding section
+          const targetId = this.getAttribute('href').substring(1);
+          const targetSection = document.getElementById(targetId);
+          if (targetSection) {
+            targetSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      });
+    }
+
+    function editProfile() {
+      showNotification('Edit profile feature coming soon!');
+    }
+
+    function changePassword() {
+      showNotification('Change password feature coming soon!');
+    }
+
+    function addAddress() {
+      document.getElementById('add-address-modal').style.display = 'flex';
+    }
+
+    function closeAddressModal() {
+      document.getElementById('add-address-modal').style.display = 'none';
+      clearAddressForm();
+    }
+
+    function clearAddressForm() {
+      document.getElementById('address-type').value = 'home';
+      document.getElementById('address-name').value = '';
+      document.getElementById('address-email').value = '';
+      document.getElementById('address-street').value = '';
+      document.getElementById('address-house').value = '';
+      document.getElementById('address-city').value = '';
+      document.getElementById('address-state').value = '';
+      document.getElementById('address-zip').value = '';
+      document.getElementById('address-country').value = '';
+      document.getElementById('address-phone').value = '';
+      document.getElementById('address-default').checked = false;
+    }
+
+    async function saveAddress(event) {
+      event.preventDefault();
+
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        showNotification('Please login to add address');
+        return;
+      }
+
+      // Enhanced field-by-field debugging
+      const fieldValues = {
+        type: document.getElementById('address-type').value,
+        name: document.getElementById('address-name').value,
+        email: document.getElementById('address-email').value,
+        house: document.getElementById('address-house').value,
+        street: document.getElementById('address-street').value,
+        city: document.getElementById('address-city').value,
+        state: document.getElementById('address-state').value,
+        zipCode: document.getElementById('address-zip').value,
+        country: document.getElementById('address-country').value,
+        phone: document.getElementById('address-phone').value,
+        isDefault: document.getElementById('address-default').checked
+      };
+
+      console.log('Individual field values:', fieldValues); // Debug each field
+      console.log('Name field specifically:', {
+        element: document.getElementById('address-name'),
+        value: document.getElementById('address-name').value,
+        isEmpty: document.getElementById('address-name').value === '',
+        length: document.getElementById('address-name').value.length
+      }); // Specific name debugging
+
+      const addressData = {
+        type: document.getElementById('address-type').value.charAt(0).toUpperCase() + document.getElementById('address-type').value.slice(1),
+        name: document.getElementById('address-name').value,
+        email: document.getElementById('address-email').value,
+        house: document.getElementById('address-house').value,
+        street: document.getElementById('address-street').value,
+        city: document.getElementById('address-city').value,
+        state: document.getElementById('address-state').value,
+        zipCode: document.getElementById('address-zip').value,
+        country: document.getElementById('address-country').value,
+        phone: document.getElementById('address-phone').value,
+        isDefault: document.getElementById('address-default').checked,
+        userId: JSON.parse(localStorage.getItem('userData') || sessionStorage.getItem('userData')).id
+      };
+
+      console.log('Address data being sent:', addressData); // Debug log
+
+      try {
+        const response = await fetch('/api/user/addresses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(addressData)
+        });
+
+        if (response.ok) {
+          showNotification('Address added successfully!');
+          closeAddressModal();
+          loadAddresses();
+        } else {
+          const error = await response.json();
+          showNotification('Failed to add address: ' + (error.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error adding address:', error);
+        showNotification('Error adding address');
+      }
+    }
+
+    async function loadAddresses() {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const response = await fetch('/api/user/addresses', {
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        if (response.ok) {
+          const addresses = await response.json();
+          displayAddresses(addresses);
+        }
+      } catch (error) {
+        console.error('Error loading addresses:', error);
+      }
+    }
+
+    function displayAddresses(addresses) {
+      const container = document.getElementById('addresses-container');
+
+      if (addresses.length === 0) {
+        container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🏠</div>
+          <p>No saved addresses</p>
+          <button class="edit-profile-btn" onclick="addAddress()">Add Address</button>
+        </div>
+      `;
+        return;
+      }
+
+      let addressesHTML = '<div class="addresses-grid">';
+      addresses.forEach((address, index) => {
+        addressesHTML += `
+        <div class="address-card">
+          <div class="address-card-header">
+            <div class="address-type-badge">
+              ${address.name} (${address.type})
+            </div>
+            ${address.isDefault ? '<div class="default-badge">Default</div>' : ''}
+          </div>
+          
+          <div class="address-details">
+            <div class="address-row principal">${address.house ? address.house : ''}</div>
+            <div class="address-row">${address.street}</div>
+            <div class="address-row city-row">${address.city}, ${address.state} - ${address.zipCode}</div>
+            <div class="address-row country-row">${address.country}</div>
+            
+            <div class="address-contact">
+              ${address.phone ? `<div class="contact-item"><span class="icon">📞</span> ${address.phone}</div>` : ''}
+              ${address.email ? `<div class="contact-item"><span class="icon">✉️</span> ${address.email}</div>` : ''}
+            </div>
+          </div>
+
+          <div class="address-actions">
+            <button class="action-btn edit" onclick="editAddress(${index})">
+              <span class="icon">✏️</span> Edit
+            </button>
+            <button class="action-btn delete" onclick="deleteAddress('${address._id}')">
+              <span class="icon">🗑️</span> Delete
+            </button>
+          </div>
+        </div>
+      `;
+      });
+      addressesHTML += '</div>';
+
+      addressesHTML += `
+      <div style="text-align: center; margin-top: 2rem;">
+        <button class="edit-profile-btn" onclick="addAddress()">+ Add Another Address</button>
+      </div>
+    `;
+
+      container.innerHTML = addressesHTML;
+    }
+
+    async function deleteAddress(addressId) {
+      // Show confirmation dialog
+      if (!confirm('Are you sure you want to delete this address? This action cannot be undone.')) {
+        return;
+      }
+
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        showNotification('Please login to delete address');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/user/addresses/${addressId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        if (response.ok) {
+          showNotification('Address deleted successfully!');
+          loadAddresses(); // Reload the addresses list
+        } else {
+          const error = await response.json();
+          showNotification('Failed to delete address: ' + (error.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error deleting address:', error);
+        showNotification('Error deleting address');
+      }
+    }
+
+    function addPaymentMethod() {
+      showNotification('Add payment method feature coming soon!');
+    }
+  </script>
+
+
+
+</body>
+
+</html>

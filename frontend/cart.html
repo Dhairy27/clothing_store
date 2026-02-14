@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart - Clothy</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <h2>Clothy</h2>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="collection.html">Collection</a>
+      <a href="cart.html" class="cart-link">
+        Cart
+        <span id="cart-count" class="cart-count">0</span>
+      </a>
+
+      <a href="admin-login.html" class="admin-btn" style="display: none;">Admin</a>
+
+      <!-- User Profile Dropdown (shown when logged in) -->
+      <div class="profile-dropdown" id="user-profile-dropdown" style="display: none;">
+        <button class="profile-btn" onclick="toggleUserProfileDropdown()">
+          <span class="profile-avatar">👤</span>
+          <span id="user-profile-username">User</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div id="user-profile-menu" class="profile-menu">
+          <div class="profile-header">
+            <div class="profile-info">
+              <h4 id="user-profile-name">User Name</h4>
+              <p id="user-profile-email">user@example.com</p>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <a href="profile.html" class="profile-link view-profile">📋 View Profile</a>
+            <a href="#" onclick="userLogout()" class="profile-link logout">🚪 Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Button (shown when not logged in) -->
+      <a href="login.html" id="login-link" class="login-btn-special">Login</a>
+    </div>
+  </nav>
+
+  <section class="cart-page">
+    <div class="cart-container">
+      <div class="cart-header">
+        <h1>🛒 Your Shopping Cart</h1>
+        <div id="cart-user-info" class="cart-user-info" style="display: none;">
+          <span class="user-cart-badge">👤 Personal Cart</span>
+          <span id="cart-user-name"></span>
+        </div>
+      </div>
+
+      <div class="cart-content">
+        <div class="cart-items-container">
+          <div id="cart" class="cart-list"></div>
+        </div>
+
+        <div class="cart-summary">
+          <div class="summary-card">
+            <h3>Order Summary</h3>
+            <div class="summary-item">
+              <span>Subtotal</span>
+              <span id="total">₹0</span>
+            </div>
+            <div class="summary-item">
+              <span>Shipping</span>
+              <span>FREE</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item total">
+              <span>Total</span>
+              <span id="total-final">₹0</span>
+            </div>
+            <button class="checkout-btn" onclick="proceedToCheckout()">
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h2>Clothy</h2>
+        <p>Elevating your everyday style with premium quality and modern aesthetics. Designed for the bold, crafted for
+          comfort.</p>
+        <div class="social-links">
+          <a href="#" class="social-link" title="Instagram">📷</a>
+          <a href="#" class="social-link" title="Twitter">🐦</a>
+          <a href="#" class="social-link" title="Facebook">📘</a>
+        </div>
+      </div>
+
+      <div class="footer-column">
+        <h3>Shop</h3>
+        <ul>
+          <li><a href="collection.html">All Products</a></li>
+          <li><a href="collection.html?category=Men">Men</a></li>
+          <li><a href="collection.html?category=Women">Women</a></li>
+          <li><a href="collection.html?category=Accessories">Accessories</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3>Company</h3>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Sustainability</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3>Support</h3>
+        <ul>
+          <li><a href="#">Help Center</a></li>
+          <li><a href="#">Shipping & Returns</a></li>
+          <li><a href="#">Size Guide</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 Clothy | Fashion Redefined</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <style>
+    /* Styles moved to style.css */
+  </style>
+  <script>
+    function proceedToCheckout() {
+      if (cart.length === 0) {
+        showNotification("Your cart is empty!");
+        return;
+      }
+
+      // Check if user is logged in (optional - you can allow guest checkout)
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        showNotification("Please login to proceed with checkout");
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
+        return;
+      }
+
+      // Redirect to checkout page
+      window.location.href = 'checkout.html';
+    }
+
+    // Update total display
+    function updateTotalDisplay() {
+      const totalElement = document.getElementById('total');
+      const totalFinalElement = document.getElementById('total-final');
+      const total = getTotalPrice();
+      if (totalElement) totalElement.textContent = '₹' + total;
+      if (totalFinalElement) totalFinalElement.textContent = '₹' + total;
+    }
+
+    // Override displayCart to also update total
+    const originalDisplayCart = displayCart;
+    displayCart = function () {
+      originalDisplayCart();
+      updateTotalDisplay();
+    };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+      checkUserLoginStatus();
+      displayCart();
+      updateCartCount();
+      updateCartUserInfo();
+    });
+
+    // Update cart user information
+    function updateCartUserInfo() {
+      const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const userInfoElement = document.getElementById('cart-user-info');
+      const userNameElement = document.getElementById('cart-user-name');
+
+      if (userData && token && userInfoElement && userNameElement) {
+        const user = JSON.parse(userData);
+        const fullName = (user.firstName + ' ' + user.lastName).trim() || user.email || 'User';
+        userNameElement.textContent = fullName;
+        userInfoElement.style.display = 'block'
+
+      } else if (userInfoElement) {
+        userInfoElement.style.display = 'none';
+        // Show message for guest users
+        showNotification('🛒 Guest cart - Login to save your items');
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Clothy Store</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styles moved to style.css */
+        .product-gallery-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-gallery {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            gap: 10px;
+            padding-bottom: 10px;
+            scrollbar-width: thin;
+        }
+
+        .product-gallery::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .product-gallery::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .gallery-item {
+            flex: 0 0 auto;
+            width: 100%;
+            /* Default to one image wide for mobile-like feel, or adjust */
+            max-width: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        /* Snap effect */
+        .product-gallery {
+            scroll-snap-type: x mandatory;
+        }
+
+        .gallery-item {
+            scroll-snap-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <h2>Clothy</h2>
+
+        <div class="nav-search-container">
+            <input type="text" id="nav-search-input" placeholder="Search products..." class="nav-search-input">
+            <button class="nav-search-btn" onclick="performNavSearch()">🔍</button>
+            <div id="nav-search-results" class="nav-search-results"></div>
+        </div>
+
+        <div>
+            <a href="index.html">Home</a>
+            <a href="collection.html">Collection</a>
+            <a href="cart.html" class="cart-link">
+                Cart
+                <span id="cart-count" class="cart-count">0</span>
+            </a>
+
+            <a href="admin-login.html" class="admin-btn" style="display: none;">Admin</a>
+
+            <!-- User Profile Dropdown (shown when logged in) -->
+            <div class="profile-dropdown" id="user-profile-dropdown" style="display: none;">
+                <button class="profile-btn" onclick="toggleUserProfileDropdown()">
+                    <span class="profile-avatar">👤</span>
+                    <span id="user-profile-username">User</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div id="user-profile-menu" class="profile-menu">
+                    <div class="profile-header">
+                        <div class="profile-info">
+                            <h4 id="user-profile-name">User Name</h4>
+                            <p id="user-profile-email">user@example.com</p>
+                        </div>
+                    </div>
+                    <div class="profile-actions">
+                        <a href="profile.html" class="profile-link view-profile">📋 View Profile</a>
+                        <a href="#" onclick="userLogout()" class="profile-link logout">🚪 Logout</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Button (shown when not logged in) -->
+            <a href="login.html" id="login-link" class="login-btn-special">Login</a>
+        </div>
+    </nav>
+
+    <div id="product-content" class="reveal">
+        <div class="loader">Loading product details...</div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h2>Clothy</h2>
+                <p>Elevating your everyday style with premium quality and modern aesthetics. Designed for the bold,
+                    crafted for comfort.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link" title="Instagram">📷</a>
+                    <a href="#" class="social-link" title="Twitter">🐦</a>
+                    <a href="#" class="social-link" title="Facebook">📘</a>
+                </div>
+            </div>
+
+            <div class="footer-column">
+                <h3>Shop</h3>
+                <ul>
+                    <li><a href="collection.html">All Products</a></li>
+                    <li><a href="collection.html?category=Men">Men</a></li>
+                    <li><a href="collection.html?category=Women">Women</a></li>
+                    <li><a href="collection.html?category=Accessories">Accessories</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Sustainability</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Shipping & Returns</a></li>
+                    <li><a href="#">Size Guide</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 Clothy | Fashion Redefined</p>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Cookie Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Simplified logic specific to this page can go here or be integrated into script.js
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            const productName = urlParams.get('name'); // Fallback if ID lookup fails or logic uses match by name
+
+            if (productId || productName) {
+                loadProductDetails(productId, productName);
+            } else {
+                document.getElementById('product-content').innerHTML = `
+         <div class="error-container">
+           <h2>Product Not Found</h2>
+           <p>We couldn't identify the product you're looking for.</p>
+           <a href="collection.html" class="btn">Browse Collection</a>
+         </div>
+       `;
+            }
+        });
+
+        async function loadProductDetails(id, name) {
+            try {
+                const response = await fetch('/api/products'); // Fetch all products for now as we don't know if single ID endpoint exists
+                const products = await response.json();
+
+                let product;
+                if (id) {
+                    product = products.find(p => p._id === id || p.id === id);
+                } else if (name) {
+                    product = products.find(p => p.name === name);
+                }
+
+                if (product) {
+                    renderProductInfo(product);
+                } else {
+                    throw new Error('Product not found in list');
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('product-content').innerHTML = `
+         <div class="error-container">
+           <h2>Product Not Found</h2>
+           <p>Sorry, this product is currently unavailable.</p>
+           <a href="collection.html" class="btn">Back to Collection</a>
+         </div>
+       `;
+            }
+        }
+
+        let selectedSize = null;
+
+        function generateSizeButtons(product) {
+            const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
+            const container = document.getElementById('size-options-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            sizes.forEach(size => {
+                const btn = document.createElement('button');
+                btn.className = 'size-btn';
+
+                // Create main size text
+                const sizeSpan = document.createElement('span');
+                sizeSpan.textContent = size;
+                btn.appendChild(sizeSpan);
+
+                let isAvailable = false;
+                let currentStock = 0;
+
+                // Check availability
+                if (product.sizes) {
+                    // Check exact size or lowercase version
+                    currentStock = product.sizes[size] !== undefined ? product.sizes[size] : (product.sizes[size.toLowerCase()] || 0);
+                    isAvailable = (currentStock > 0);
+                } else if (product.stock > 0) {
+                    // Legacy/Simple stock fallback
+                    isAvailable = true;
+                    currentStock = product.stock; // Assume global stock applies
+                }
+
+                if (!isAvailable) {
+                    btn.classList.add('unavailable');
+                    btn.disabled = true;
+                    btn.title = 'Out of Stock';
+                } else {
+                    // If low stock, show the count on the button itself
+                    if (currentStock < 10) {
+                        const stockSpan = document.createElement('span');
+                        stockSpan.className = 'stock-count';
+                        stockSpan.textContent = `${currentStock} left`;
+                        btn.appendChild(stockSpan);
+                    }
+
+                    btn.onclick = () => selectSize(btn, size, currentStock);
+                }
+
+                container.appendChild(btn);
+            });
+        }
+
+        function renderProductInfo(product) {
+            const container = document.getElementById('product-content');
+
+            // Generate images HTML
+            let imagesHtml = '';
+            // If we have an array of images (new format)
+            if (product.images && product.images.length > 0) {
+                imagesHtml = `
+                    <div class="product-gallery-container">
+                        <div class="product-gallery">
+                            ${product.images.map(img => `
+                                <div class="gallery-item">
+                                    <img src="${img.replace(/\\/g, '/')}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/400'">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Fallback to single image
+                imagesHtml = `
+                    <div class="product-images">
+                        <img src="${product.image ? product.image.replace(/\\/g, '/') : 'https://via.placeholder.com/400'}" 
+                             alt="${product.name}" class="main-image">
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+      <div class="product-info-container">
+        ${imagesHtml}
+        
+        <div class="product-details">
+          <span class="product-category">${product.category || 'Fashion'}</span>
+          <h1 class="product-title">${product.name}</h1>
+          
+          <div class="product-price">
+            <span class="price-tag">₹${product.price}</span>
+          </div>
+          
+          <p class="description">
+            Experience premium quality with our ${product.name}. 
+            Perfect for any occasion, crafted with attention to detail and comfort.
+            ${product.description ? product.description : ''}
+          </p>
+          
+          <!-- Color Selector -->
+          ${generateColorSelector(product)}
+
+          <div class="size-selector">
+            <label class="size-label">Select Size</label>
+            <div class="size-options" id="size-options-container">
+              <!-- Size buttons will be generated here -->
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <button class="add-to-cart-btn" onclick="addToCartWithSize('${product.name}', ${product.price}, '${product._id || product.id}')">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+            // Generate dynamic size buttons
+            generateSizeButtons(product);
+        }
+
+        function generateColorSelector(product) {
+            if (!product.colors || product.colors.length === 0) return '';
+
+            let html = `
+      <div class="color-selector">
+        <label class="color-label">Select Color</label>
+        <div class="color-options">
+    `;
+
+            // Check if we need to add current product to the list (if not present) 
+            // or just rely on what's in the list. 
+            // For now, rely on the list.
+
+            product.colors.forEach(color => {
+                const isActive = color.id === (product._id || product.id);
+                // Use onclick to redirect
+                html += `
+        <button class="color-option-btn ${isActive ? 'active' : ''}" 
+                onclick="goToProduct('${color.id}')">
+          ${color.name}
+        </button>
+      `;
+            });
+
+            html += `
+        </div>
+      </div>
+    `;
+
+            return html;
+        }
+
+        function goToProduct(id) {
+            window.location.href = `product-info.html?id=${id}`;
+        }
+
+        function selectSize(btn, size, stock) {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedSize = size;
+        }
+
+        function addToCartWithSize(name, price, productId) {
+            if (!selectedSize) {
+                showNotification('Please select a size first');
+                return;
+            }
+            // Call the global addToCart function from script.js
+            addToCart(name, price, selectedSize, productId);
+        }
+    </script>
+</body>
+
+</html>

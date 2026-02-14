@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collection - Clothy Store</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <h2>Clothy</h2>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="collection.html" class="active">Collection</a>
+      <a href="cart.html" class="cart-link">
+        Cart
+        <span id="cart-count" class="cart-count">0</span>
+      </a>
+
+      <a href="admin-login.html" class="admin-btn admin-btn-hidden">Admin</a>
+
+      <!-- User Profile Dropdown (shown when logged in) -->
+      <div class="profile-dropdown" id="user-profile-dropdown" class="profile-dropdown-hidden">
+        <button class="profile-btn" onclick="toggleUserProfileDropdown()">
+          <span class="profile-avatar">👤</span>
+          <span id="user-profile-username">User</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div id="user-profile-menu" class="profile-menu">
+          <div class="profile-header">
+            <div class="profile-info">
+              <h4 id="user-profile-name">User Name</h4>
+              <p id="user-profile-email">user@example.com</p>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <a href="#" onclick="showUserProfileDetails()" class="profile-link view-profile">📋 View Profile</a>
+            <a href="#" onclick="userLogout()" class="profile-link logout">🚪 Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Button (shown when not logged in) -->
+      <a href="login.html" id="login-link" class="login-btn-special">Login</a>
+    </div>
+  </nav>
+
+  <section class="collection-page reveal">
+    <div class="collection-header">
+      <h1>Our Collection</h1>
+      <p>Discover our premium fashion collection organized by categories</p>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="category-filter">
+      <div class="filter-tabs">
+        <button class="category-tab active" onclick="filterByCategory('all')">All Collection</button>
+        <!-- Categories will be dynamically added here -->
+      </div>
+      <div class="search-box">
+        <input type="text" id="collection-search" placeholder="Search collection..." onkeyup="searchCollection()">
+        <button onclick="searchCollection()">🔍</button>
+      </div>
+    </div>
+
+    <!-- Collection Container -->
+    <div id="collection-container">
+      <div class="loading">Loading collection...</div>
+    </div>
+
+    <!-- No Collection Message -->
+    <div id="no-collection" class="no-collection" style="display: none;">
+      <h3>No collection found</h3>
+      <p>Try adjusting your search or filter criteria</p>
+      <button onclick="filterByCategory('all')" class="btn">View All Collection</button>
+    </div>
+  </section>
+
+  <!-- Quick View Modal -->
+
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h2>Clothy</h2>
+        <p>Elevating your everyday style with premium quality and modern aesthetics. Designed for the bold, crafted for
+          comfort.</p>
+        <div class="social-links">
+          <a href="#" class="social-link" title="Instagram">📷</a>
+          <a href="#" class="social-link" title="Twitter">🐦</a>
+          <a href="#" class="social-link" title="Facebook">📘</a>
+        </div>
+      </div>
+
+      <div class="footer-column">
+        <h3>Shop</h3>
+        <ul>
+          <li><a href="collection.html">All Products</a></li>
+          <li><a href="collection.html?category=Men">Men</a></li>
+          <li><a href="collection.html?category=Women">Women</a></li>
+          <li><a href="collection.html?category=Accessories">Accessories</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3>Company</h3>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Sustainability</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3>Support</h3>
+        <ul>
+          <li><a href="#">Help Center</a></li>
+          <li><a href="#">Shipping & Returns</a></li>
+          <li><a href="#">Size Guide</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 Clothy | Fashion Redefined</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    // Collection page specific functionality
+    let allCollection = [];
+    let currentCategory = 'all';
+
+    // Load collection when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+      checkUserLoginStatus();
+      loadCollection();
+      updateCartCount();
+    });
+
+    // Load all collection from API
+    async function loadCollection() {
+      try {
+        const response = await fetch('/api/products');
+        if (!response.ok) {
+          throw new Error('Failed to fetch collection');
+        }
+        allCollection = await response.json();
+
+        // Filter out hidden products (inCollection !== false)
+        allCollection = allCollection.filter(p => p.inCollection !== false);
+
+        // Populate category tabs
+        populateCategories();
+
+        // Check for URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryParam = urlParams.get('category');
+        const searchParam = urlParams.get('search'); // Check for search param
+
+        if (searchParam) {
+          document.getElementById('collection-search').value = searchParam;
+          // Delay slightly to ensure data is loaded/processed
+          setTimeout(searchCollection, 100);
+        }
+
+        if (categoryParam) {
+          if (['Men', 'Women', 'Kids', 'Accessories'].includes(categoryParam)) {
+            const btn = document.querySelector(`button[onclick*="'${categoryParam}'"]`);
+            filterByGender(categoryParam, btn);
+          } else {
+            filterBySubCategory(categoryParam, null);
+          }
+        } else if (!searchParam) { // Only show all if no category AND no search
+          displayCollection(allCollection);
+        }
+      } catch (error) {
+        console.error('Error loading collection:', error);
+        document.getElementById('collection-container').innerHTML =
+          '<div class="error">Failed to load collection. Please try again later.</div>';
+      }
+    }
+
+    // ==========================================
+    // NEW GENDER-BASED NAVIGATION LOGIC
+    // ==========================================
+
+    let currentGender = 'all';
+    let currentCategoryFilter = 'all';
+
+    // 1. Initialize Tabs (Fixed Gender Tabs)
+    function populateCategories() {
+      const filterTabs = document.querySelector('.filter-tabs');
+
+      // Hardcoded Gender Tabs
+      filterTabs.innerHTML = `
+        <button class="category-tab active" onclick="filterByGender('all', this)">All Collection</button>
+        <button class="category-tab" onclick="filterByGender('Men', this)">Men</button>
+        <button class="category-tab" onclick="filterByGender('Women', this)">Women</button>
+        <button class="category-tab" onclick="filterByGender('Kids', this)">Kids</button>
+        <button class="category-tab" onclick="filterByGender('Accessories', this)">Accessories</button>
+      `;
+    }
+
+    // 2. Filter by Gender (Main Tabs)
+    function filterByGender(gender, btnElement) {
+      currentGender = gender;
+      currentCategoryFilter = 'all'; // Reset sub-category
+
+      // UI Updates
+      if (btnElement) {
+        document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+        btnElement.classList.add('active');
+
+        // Hide sub-filters initially when switching gender
+        const subContainer = document.getElementById('sub-filter-container');
+        if (subContainer) subContainer.style.display = 'none';
+      }
+
+      // Filter Logic
+      let filteredProducts = allCollection;
+
+      if (gender !== 'all') {
+        const keywords = getGenderKeywords(gender);
+        filteredProducts = allCollection.filter(p => {
+          const text = (p.name + ' ' + p.description + ' ' + p.category).toLowerCase();
+          return keywords.some(k => text.includes(k));
+        });
+      }
+
+      // Display Products
+      displayCollection(filteredProducts);
+
+      // Generate Sub-Filters (Actual DB Categories) based on these results
+      generateCategorySubFilters(filteredProducts);
+    }
+
+    function getGenderKeywords(gender) {
+      if (gender === 'Men') return ['men', 'male', 'boy', 'gent'];
+      if (gender === 'Women') return ['women', 'female', 'girl', 'lady', 'dress', 'gown'];
+      if (gender === 'Kids') return ['kid', 'child', 'baby', 'junior'];
+      if (gender === 'Accessories') return ['accessory', 'watch', 'belt', 'wallet', 'jewelry', 'bag'];
+      return [];
+    }
+
+    // 3. Generate Sub-Filters (Real DB Categories like Shirts, Shoes)
+    function generateCategorySubFilters(products) {
+      const subContainer = document.getElementById('sub-filter-container');
+      const subScroll = subContainer.querySelector('.sub-filter-scroll');
+
+      // Extract unique categories from the CURRENT filtered product set
+      const categories = [...new Set(products.map(p => p.category))].sort();
+
+      if (categories.length === 0) {
+        subContainer.style.display = 'none';
+        return;
+      }
+
+      subContainer.style.display = 'block';
+
+      let html = `<button class="sub-filter-chip active" onclick="filterBySubCategory('all', this)">All Types</button>`;
+
+      categories.forEach(cat => {
+        html += `<button class="sub-filter-chip" onclick="filterBySubCategory('${cat}', this)">${cat}</button>`;
+      });
+
+      subScroll.innerHTML = html;
+    }
+
+    // 4. Filter by Sub-Category (The chips)
+    function filterBySubCategory(category, btnElement) {
+      currentCategoryFilter = category;
+
+      // UI Update
+      if (btnElement) {
+        document.querySelectorAll('.sub-filter-chip').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+      }
+
+      // 1. Start with Gender Filter
+      let results = allCollection;
+      if (currentGender !== 'all') {
+        const keywords = getGenderKeywords(currentGender);
+        results = results.filter(p => {
+          const text = (p.name + ' ' + p.description + ' ' + p.category).toLowerCase();
+          return keywords.some(k => text.includes(k));
+        });
+      }
+
+      // 2. Apply Category Filter
+      if (category !== 'all') {
+        // Check if it's a special collection (like best-collection)
+        // We assume typical categories start with Uppercase (Men, Women) and collections might be lowercase or verified against a list
+        // Or simply check if it matches category OR is in collections array
+        results = results.filter(p => p.category === category || (p.collections && p.collections.includes(category)));
+      }
+
+      displayCollection(results);
+    }
+
+    // Legacy function override
+    filterByCategory = function (category) {
+      console.log('Legacy filter called');
+    }
+
+    // Search collection
+    function searchCollection() {
+      const searchTerm = document.getElementById('collection-search').value.toLowerCase();
+
+      let filteredCollection = allCollection;
+
+      // 1. Apply Gender Filter
+      if (currentGender !== 'all') {
+        const keywords = getGenderKeywords(currentGender);
+        filteredCollection = filteredCollection.filter(p => {
+          const text = (p.name + ' ' + p.description + ' ' + p.category).toLowerCase();
+          return keywords.some(k => text.includes(k));
+        });
+      }
+
+      // 2. Apply Sub-Category Filter
+      if (currentCategoryFilter !== 'all') {
+        filteredCollection = filteredCollection.filter(p => p.category === currentCategoryFilter);
+      }
+
+      // Apply search filter
+      if (searchTerm) {
+        filteredCollection = filteredCollection.filter(p =>
+          p.name.toLowerCase().includes(searchTerm) ||
+          p.description.toLowerCase().includes(searchTerm) ||
+          p.category.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      displayCollection(filteredCollection);
+    }
+
+    // Display collection with category sections
+    function displayCollection(collection) {
+      const container = document.getElementById('collection-container');
+      const noCollection = document.getElementById('no-collection');
+
+      if (!collection || collection.length === 0) {
+        container.innerHTML = '';
+        noCollection.style.display = 'block';
+        return;
+      }
+
+      noCollection.style.display = 'none';
+
+      // Group collection by category
+      const collectionByCategory = collection.reduce((acc, item) => {
+        if (!acc[item.category]) {
+          acc[item.category] = [];
+        }
+        acc[item.category].push(item);
+        return acc;
+      }, {});
+
+      let html = '';
+
+      // Display each category section
+      Object.keys(collectionByCategory).forEach(category => {
+        html += `
+      <div class="category-section">
+        <div class="category-header">
+          <h2>${category}</h2>
+          <span class="collection-count">${collectionByCategory[category].length} items</span>
+        </div>
+        <div class="collection-grid">
+    `;
+
+        collectionByCategory[category].forEach(item => {
+          html += `
+        <div class="collection-card" onclick="window.location.href='product-info.html?id=${item._id || item.id}&name=${encodeURIComponent(item.name)}'" style="cursor: pointer;">
+          <div class="collection-image">
+            <img src="${item.image ? item.image.replace(/\\/g, '/') : 'https://via.placeholder.com/300x300?text=No+Image'}" 
+                 alt="${item.name}" 
+                 onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'">
+          </div>
+          <div class="collection-info">
+            <h3>${item.name}</h3>
+            <p class="collection-category">${item.category}</p>
+            <p class="collection-description">${item.description || 'No description available'}</p>
+            <div class="collection-price">
+              <span class="current-price">₹${item.price}</span>
+            </div>
+          </div>
+        </div>
+      `;
+        });
+
+        html += `
+        </div>
+      </div>
+    `;
+      });
+
+      container.innerHTML = html;
+    }
+  </script>
+
+</body>
+
+</html>
