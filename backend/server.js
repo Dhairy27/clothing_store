@@ -41,7 +41,11 @@ const upload = multer({ storage: storage });
 
 // Initialize MongoDB connection
 const mongoUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017';
-const client = new MongoClient(mongoUrl);
+const client = new MongoClient(mongoUrl, {
+  family: 4, // Force IPv4
+  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+  socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+});
 let db;
 
 
