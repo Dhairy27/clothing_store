@@ -42,9 +42,8 @@ const upload = multer({ storage: storage });
 // Initialize MongoDB connection
 const mongoUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017';
 const client = new MongoClient(mongoUrl, {
-  family: 4, // Force IPv4
-  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-  socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
 });
 let db;
 
@@ -107,6 +106,20 @@ async function connectToMongo() {
     await initializeDatabase();
   } catch (err) {
     console.error('Error connecting to MongoDB:', err.message);
+
+    // Check for specific SSL error related to IP Whitelisting
+    if (err.message && (err.message.includes('SSL routines') || err.message.includes('SSL alert number 80'))) {
+      console.error('\n===============================================================');
+      console.error('                           ERROR');
+      console.error('===============================================================');
+      console.error('The application failed to connect to MongoDB Atlas.');
+      console.error('Error Code: SSL alert number 80');
+      console.error('Cause: Your IP address is likely not whitelisted in MongoDB Atlas.');
+      console.error('Solution: Log in to MongoDB Atlas -> Network Access -> Add IP Address.');
+      console.error('          Allow access from anywhere (0.0.0.0/0) or your specific IP.');
+      console.error('===============================================================\n');
+    }
+
     process.exit(1);
   }
 }
